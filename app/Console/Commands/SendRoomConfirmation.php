@@ -32,7 +32,7 @@ class SendRoomConfirmation extends Command
             ];
             $targetHari = $dayMap[$targetDate->dayOfWeek];
 
-            $jadwals = JadwalRuangan::with('ruang', 'user')->where('hari', 'LIKE', $targetHari)->get();
+            $jadwals = JadwalRuangan::with('ruang', 'Penanggungjawab')->where('hari', 'LIKE', $targetHari)->get();
 
             foreach ($jadwals as $jadwal) {
                 if (!$jadwal->user_id) continue;
