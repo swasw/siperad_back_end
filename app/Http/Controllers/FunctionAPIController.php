@@ -1639,7 +1639,7 @@ class FunctionAPIController extends Controller
 
     public function listSemuaKonfirmasi()
     {
-        $konfirmasis = \App\Models\JadwalKonfirmasi::with(['jadwalRuangan.ruang', 'jadwalRuangan.user'])
+        $konfirmasis = \App\Models\JadwalKonfirmasi::with(['jadwalRuangan.ruang', 'jadwalRuangan.Penanggungjawab'])
             ->orderBy('created_at', 'desc')
             ->get();
             
