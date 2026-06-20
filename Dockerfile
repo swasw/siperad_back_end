@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libgmp-dev \
-    zip
+    zip \
+    supervisor
 
 RUN docker-php-ext-install pdo pdo_mysql bcmath gmp
 
@@ -19,4 +20,6 @@ RUN composer install --no-dev --optimize-autoloader
 
 EXPOSE 10000
 
-CMD sh -c "php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
