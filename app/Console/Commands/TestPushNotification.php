@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushMessage;
 use NotificationChannels\WebPush\WebPushChannel;
+use Minishlink\WebPush\WebPush;
+use Minishlink\WebPush\Subscription;
 
 class TestPushNotification extends Command
 {
@@ -42,25 +44,52 @@ class TestPushNotification extends Command
             return;
         }
 
-        $notification = new class extends Notification {
-            public function via($notifiable)
-            {
-                return [WebPushChannel::class];
+        $subscriptions = $user->pushSubscriptions;
+
+        $auth = [
+            'VAPID' => [
+                'subject' => env('VAPID_SUBJECT') ?: 'mailto:test@example.com',
+                'publicKey' => env('VAPID_PUBLIC_KEY'),
+                'privateKey' => env('VAPID_PRIVATE_KEY'),
+            ],
+        ];
+
+        $webPush = new WebPush($auth);
+        $payload = json_encode([
+            'title' => 'Test Notifikasi SIPERAD',
+            'body' => 'Halo! Ini adalah notifikasi test ke HP kamu.',
+            'icon' => '/frontend/assets/img/logo-unj.png',
+            'data' => ['url' => '/user/notifikasi']
+        ]);
+
+        $this->info("Mencoba mengirim ke " . $subscriptions->count() . " device...");
+
+        foreach ($subscriptions as $sub) {
+            $webPush->queueNotification(
+                Subscription::create(json_decode($sub->data, true) ?: [
+                    'endpoint' => $sub->endpoint,
+                    'publicKey' => $sub->public_key,
+                    'authToken' => $sub->auth_token,
+                ]),
+                $payload
+            );
+        }
+
+        $success = 0;
+        foreach ($webPush->flush() as $report) {
+            $endpoint = $report->getRequest()->getUri()->__toString();
+
+            if ($report->isSuccess()) {
+                $this->info("[Sukses] Terkirim ke {$endpoint}");
+                $success++;
+            } else {
+                $this->error("[Gagal] Gagal kirim ke {$endpoint}");
+                $this->error("Alasan: " . $report->getReason());
             }
+        }
 
-            public function toWebPush($notifiable, $notification)
-            {
-                return (new WebPushMessage)
-                    ->title('Test Notifikasi SIPERAD')
-                    ->icon('/frontend/assets/img/logo-unj.png')
-                    ->body('Halo! Ini adalah notifikasi test untuk memastikan push notification berjalan dengan baik di HP kamu.')
-                    ->action('Buka SIPERAD', 'open_app')
-                    ->data(['url' => "/user/notifikasi"]);
-            }
-        };
-
-        $user->notify($notification);
-
-        $this->info("Notifikasi berhasil dikirim ke user {$identifier}!");
+        if ($success > 0) {
+            $this->info("Total $success notifikasi berhasil diteruskan ke FCM/Server Push.");
+        }
     }
 }
