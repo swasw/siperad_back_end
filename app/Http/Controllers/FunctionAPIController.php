@@ -1400,6 +1400,7 @@ class FunctionAPIController extends Controller
             'username' => 'required|max:100|unique:users,username,' . $id,
             'prodi_id' => 'required|exists:prodis,id',
             'angkatan_id' => 'required|exists:angkatans,id',
+            'no_telfon' => 'nullable|max:50',
             'password' => 'nullable|min:6'
         ]);
 
