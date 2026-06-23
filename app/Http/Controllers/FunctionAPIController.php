@@ -276,7 +276,7 @@ class FunctionAPIController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama_ruang' => 'required|min:5|max:100',
-            'keterangan' => 'required|min:5|max:100',
+            'keterangan' => 'nullable|max:100',
             'status_ruang' => 'required',
         ]);
 
@@ -304,7 +304,7 @@ class FunctionAPIController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama_ruang' => 'required|min:5|max:100',
-            'keterangan' => 'required|min:5|max:100',
+            'keterangan' => 'nullable|max:100',
             'status_ruang' => 'required'
         ]);
 
