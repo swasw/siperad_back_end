@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('app:send-room-confirmation')->everyMinute()->between('08:00', '23:59');
+        $schedule->command('app:send-room-confirmation')->everyMinute()->between('08:00', '23:59')->withoutOverlapping();
         $schedule->command('dosen:reset-kehadiran')->dailyAt('00:00');
     }
 
