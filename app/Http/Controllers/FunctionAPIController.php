@@ -1353,8 +1353,7 @@ class FunctionAPIController extends Controller
 
     public function indexMahasiswa()
     {
-        $data = User::with(['prodi', 'angkatan'])->where('type', 'mahasiswa')->get();
-        // $data = User::with(['prodi', 'angkatan'])->get();
+        $data = User::with(['prodi', 'angkatan'])->get();
 
         if ($data->isEmpty()) {
             return response()->json(['message' => 'No data found'], 404);
@@ -1386,7 +1385,7 @@ class FunctionAPIController extends Controller
 
     public function getMahasiswa($id)
     {
-        $data = User::with(['prodi', 'angkatan'])->where('id', $id)->where('type', 'mahasiswa')->first();
+        $data = User::with(['prodi', 'angkatan'])->where('id', $id)->first();
         if ($data == null) {
             return response()->json(['message' => 'No data found'], 404);
         }
