@@ -635,38 +635,20 @@ class FunctionAPIController extends Controller
 
         $statusText = $request->status_peminjaman == 1 ? 'disetujui' : 'ditolak';
 
-        // PWA Web Push Notification Logic
+        // PWA Web Push Notification Logic via Artisan Command to match CLI environment
         if ($data->user_id) {
-            $user = \App\Models\User::find($data->user_id);
-            if ($user && $user->pushSubscriptions()->count() > 0) {
-                $auth = [
-                    'VAPID' => [
-                        'subject' => config('webpush.vapid.subject', 'mailto:admin@example.com'),
-                        'publicKey' => config('webpush.vapid.public_key'),
-                        'privateKey' => config('webpush.vapid.private_key'),
-                    ],
-                ];
-                $webPush = new \Minishlink\WebPush\WebPush($auth);
-                $ruangName = $data->Ruang ? $data->Ruang->nama_ruang : 'Ruangan';
-                
-                $payload = json_encode([
-                    'title' => 'Status Peminjaman Ruangan',
-                    'body' => "Pengajuan peminjaman untuk $ruangName pada {$data->tgl_peminjaman} telah $statusText.",
-                    'icon' => '/frontend/assets/img/logo-unj.png',
-                    'data' => ['url' => '/user/notifikasi']
+            $ruangName = $data->Ruang ? $data->Ruang->nama_ruang : 'Ruangan';
+            $message = "Pengajuan peminjaman untuk $ruangName pada {$data->tgl_peminjaman} telah $statusText.";
+            
+            \Illuminate\Support\Facades\Log::info("Memanggil artisan push:status untuk user_id: {$data->user_id}");
+            
+            try {
+                \Illuminate\Support\Facades\Artisan::call('push:status', [
+                    'user_id' => $data->user_id,
+                    'message' => $message
                 ]);
-
-                foreach ($user->pushSubscriptions as $sub) {
-                    $webPush->queueNotification(
-                        \Minishlink\WebPush\Subscription::create(json_decode($sub->data, true) ?: [
-                            'endpoint' => $sub->endpoint,
-                            'publicKey' => $sub->public_key,
-                            'authToken' => $sub->auth_token,
-                        ]),
-                        $payload
-                    );
-                }
-                $webPush->flush();
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal memanggil artisan push:status: " . $e->getMessage());
             }
         }
 
