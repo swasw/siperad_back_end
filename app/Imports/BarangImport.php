@@ -20,12 +20,14 @@ class BarangImport implements ToModel, WithStartRow
             return null;
         }
 
-        return new Barang([
-            'nama_barang' => $row[0] ?? '-',
-            'deskripsi_barang' => $row[1] ?? '-',
-            'status_barang' => 'Tersedia', // Default
-            'stok' => $row[2] ?? 0
-        ]);
+        return Barang::updateOrCreate(
+            ['nama_barang' => $row[0] ?? '-'], // Kunci pencarian agar tidak duplicate
+            [
+                'deskripsi_barang' => $row[1] ?? '-',
+                'status_barang' => 1, // 1 = Tersedia
+                'stok' => $row[2] ?? 0
+            ]
+        );
     }
 
     /**
