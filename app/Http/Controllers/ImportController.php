@@ -79,35 +79,8 @@ class ImportController extends Controller
 
         $file = $request->file('file');
         
-        // Baca file sebagai CSV (karena kita arahkan user upload CSV)
-        if (($handle = fopen($file->getRealPath(), "r")) !== FALSE) {
-            $header = true;
-            // Support delimiter koma (,) atau titik koma (;)
-            $delimiter = ',';
-            
-            while (($data = fgetcsv($handle, 1000, $delimiter)) !== FALSE) {
-                // Auto-detect delimiter pada baris pertama jika memungkinkan
-                if ($header && count($data) == 1 && strpos($data[0], ';') !== false) {
-                    $delimiter = ';';
-                    $data = explode(';', $data[0]);
-                }
-                
-                if ($header) {
-                    $header = false;
-                    continue; // Lewati baris pertama (header)
-                }
-
-                // Cek agar tidak error jika row kosong
-                if (!isset($data[0]) || trim($data[0]) === '') {
-                    continue;
-                }
-
-                Angkatan::create([
-                    'angkatan' => $data[0]
-                ]);
-            }
-            fclose($handle);
-        }
+        // Proses file dengan Maatwebsite Excel (mendukung csv, xls, xlsx)
+        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\AngkatanImport, $file);
 
         return redirect()->route('import.index')->with('success', 'Data Angkatan berhasil di-import.');
     }
@@ -126,36 +99,8 @@ class ImportController extends Controller
 
         $file = $request->file('file');
         
-        // Baca file sebagai CSV
-        if (($handle = fopen($file->getRealPath(), "r")) !== FALSE) {
-            $header = true;
-            $delimiter = ',';
-            
-            while (($data = fgetcsv($handle, 1000, $delimiter)) !== FALSE) {
-                // Auto-detect delimiter
-                if ($header && count($data) == 1 && strpos($data[0], ';') !== false) {
-                    $delimiter = ';';
-                    $data = explode(';', $data[0]);
-                }
-
-                if ($header) {
-                    $header = false;
-                    continue; // Lewati baris pertama (header)
-                }
-
-                if (!isset($data[0]) || trim($data[0]) === '') {
-                    continue;
-                }
-
-                Barang::create([
-                    'nama_barang' => $data[0] ?? '-',
-                    'deskripsi_barang' => $data[1] ?? '-',
-                    'status_barang' => 'Tersedia', // Default
-                    'stok' => $data[2] ?? 0
-                ]);
-            }
-            fclose($handle);
-        }
+        // Proses file dengan Maatwebsite Excel (mendukung csv, xls, xlsx)
+        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\BarangImport, $file);
 
         return redirect()->route('import.index')->with('success', 'Data Barang berhasil di-import.');
     }
