@@ -99,7 +99,7 @@ class LoginController extends Controller
         if (auth()->attempt(array('username' => $input['username'], 'password' => $input['password']))) {
             // dd(auth()->user());
 
-            if (auth()->user()->type == '1') {
+            if (auth()->user()->type == 'admin') {
 
                 return redirect()->route('admin.home');
             } else {
