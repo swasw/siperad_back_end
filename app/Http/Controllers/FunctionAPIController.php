@@ -633,6 +633,43 @@ class FunctionAPIController extends Controller
             'status_peminjaman' => $request->status_peminjaman
         ]);
 
+        $statusText = $request->status_peminjaman == 1 ? 'disetujui' : 'ditolak';
+
+        // PWA Web Push Notification Logic
+        if ($data->user_id) {
+            $user = \App\Models\User::find($data->user_id);
+            if ($user && $user->pushSubscriptions()->count() > 0) {
+                $auth = [
+                    'VAPID' => [
+                        'subject' => env('VAPID_SUBJECT', 'mailto:admin@example.com'),
+                        'publicKey' => env('VAPID_PUBLIC_KEY'),
+                        'privateKey' => env('VAPID_PRIVATE_KEY'),
+                    ],
+                ];
+                $webPush = new \Minishlink\WebPush\WebPush($auth);
+                $ruangName = $data->Ruang ? $data->Ruang->nama_ruang : 'Ruangan';
+                
+                $payload = json_encode([
+                    'title' => 'Status Peminjaman Ruangan',
+                    'body' => "Pengajuan peminjaman untuk $ruangName pada {$data->tgl_peminjaman} telah $statusText.",
+                    'icon' => '/frontend/assets/img/logo-unj.png',
+                    'data' => ['url' => '/user/notifikasi']
+                ]);
+
+                foreach ($user->pushSubscriptions as $sub) {
+                    $webPush->queueNotification(
+                        \Minishlink\WebPush\Subscription::create(json_decode($sub->data, true) ?: [
+                            'endpoint' => $sub->endpoint,
+                            'publicKey' => $sub->public_key,
+                            'authToken' => $sub->auth_token,
+                        ]),
+                        $payload
+                    );
+                }
+                $webPush->flush();
+            }
+        }
+
         return response()->json(['message' => 'Status Peminjaman Ruang updated successfully'], 200);
     }
 
