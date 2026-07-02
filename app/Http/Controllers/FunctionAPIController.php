@@ -38,27 +38,33 @@ class FunctionAPIController extends Controller
     // POST /api/alat
     public function storeAlat(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'nama_barang' => ['required', 'max:100'],
-            'deskripsi_barang' => ['required', 'max:100'],
-            'status_barang' => ['nullable'],
-            'stok' => ['required', 'numeric', 'min:0'],
-        ]);
+        $data = $request->all();
+        
+        // Cek apakah frontend mengirimkan array of objects (multiple rows) atau single object
+        $items = isset($data[0]) && is_array($data[0]) ? $data : [$data];
+        
+        $errors = [];
+        foreach ($items as $index => $item) {
+            $nama = $item['nama_barang'] ?? $item['nama_alat'] ?? null;
+            if (!$nama) {
+                $errors[] = "Row $index: nama_barang is missing";
+                continue;
+            }
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            Barang::updateOrCreate(
+                ['nama_barang' => $nama],
+                [
+                    'deskripsi_barang' => $item['deskripsi_barang'] ?? $item['deskripsi'] ?? '-',
+                    'status_barang' => $item['status_barang'] ?? $item['status_alat'] ?? 1,
+                    'stok' => (int) ($item['stok'] ?? 0)
+                ]
+            );
         }
 
-        $data = $validator->validated();
-        
-        Barang::updateOrCreate(
-            ['nama_barang' => $data['nama_barang']],
-            [
-                'deskripsi_barang' => $data['deskripsi_barang'],
-                'status_barang' => $data['status_barang'] ?? 1, // Default ke 1 (Tersedia) jika tidak dikirim
-                'stok' => $data['stok']
-            ]
-        );
+        if (count($errors) > 0 && count($errors) === count($items)) {
+            // Semua gagal
+            return response()->json(['errors' => $errors, 'message' => 'All items failed validation'], 422);
+        }
 
         return response()->json(['message' => 'Alat created/updated successfully'], 201);
     }
