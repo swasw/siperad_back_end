@@ -12,6 +12,8 @@ class PeminjamanRuang extends Model
 
     protected $fillable = [
         'nama_peminjam',
+        'no_telfon',
+        'user_id',
         'tgl_peminjaman',
         'jam_mulai_id',
         'jam_selesai_id',
@@ -22,6 +24,11 @@ class PeminjamanRuang extends Model
         'prodi',
         'angkatan',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function Ruang()
     {

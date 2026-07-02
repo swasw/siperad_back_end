@@ -40,6 +40,7 @@
                                 <th>No</th>
                                 <th>Tgl Peminjaman</th>
                                 <th>Nama Peminjam</th>
+                                <th>No Telfon</th>
                                 <th>Mata Kuliah</th>
                                 <th>Jam Mulai</th>
                                 <th>Jam Selesai</th>
@@ -57,7 +58,8 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $d->tgl_peminjaman }}</td>
                                     <td>{{ $d->nama_peminjam }}</td>
-                                    <td>{{ $d->matkul['mata_kuliah'] }}</td>
+                                    <td>{{ $d->no_telfon ?? '-' }}</td>
+                                    <td>{{ $d->matkul['mata_kuliah'] ?? $d->mata_kuliah }}</td>
                                     <td>{{ substr($d->jamx['jam'], 0, 5) }}</td>
                                     <td>{{ substr($d->jamy['jam'], 0, 5) }}</td>
                                     <td>{{ $d->dosen['nama_dosen'] }}</td>

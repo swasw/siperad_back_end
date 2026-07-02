@@ -375,6 +375,8 @@ class FunctionAPIController extends Controller
             'jam_selesai_id' => 'required',
             'prodi' => 'required',
             'angkatan' => 'required',
+            'no_telfon' => 'required',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         if ($validator->fails()) {
