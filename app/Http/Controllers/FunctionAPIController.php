@@ -353,7 +353,7 @@ class FunctionAPIController extends Controller
 
     public function indexPeminjamanRuang()
     {
-        $data = PeminjamanRuang::with(['ruang', 'jamx', 'jamy'])->get();
+        $data = PeminjamanRuang::with(['ruang', 'jamx', 'jamy', 'user'])->get();
         // $data = PeminjamanRuang::all();
 
         if ($data->isEmpty()) {
