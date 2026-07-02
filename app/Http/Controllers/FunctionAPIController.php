@@ -41,7 +41,7 @@ class FunctionAPIController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_barang' => ['required', 'max:100'],
             'deskripsi_barang' => ['required', 'max:100'],
-            'status_barang' => ['required'],
+            'status_barang' => ['nullable'],
             'stok' => ['required', 'numeric', 'min:0'],
         ]);
 
@@ -49,9 +49,18 @@ class FunctionAPIController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        Barang::create($validator->validated());
+        $data = $validator->validated();
+        
+        Barang::updateOrCreate(
+            ['nama_barang' => $data['nama_barang']],
+            [
+                'deskripsi_barang' => $data['deskripsi_barang'],
+                'status_barang' => $data['status_barang'] ?? 1, // Default ke 1 (Tersedia) jika tidak dikirim
+                'stok' => $data['stok']
+            ]
+        );
 
-        return response()->json(['message' => 'Alat created successfully'], 201);
+        return response()->json(['message' => 'Alat created/updated successfully'], 201);
     }
 
     // GET /api/alat/{id}
