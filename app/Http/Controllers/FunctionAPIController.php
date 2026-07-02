@@ -641,9 +641,9 @@ class FunctionAPIController extends Controller
             if ($user && $user->pushSubscriptions()->count() > 0) {
                 $auth = [
                     'VAPID' => [
-                        'subject' => env('VAPID_SUBJECT', 'mailto:admin@example.com'),
-                        'publicKey' => env('VAPID_PUBLIC_KEY'),
-                        'privateKey' => env('VAPID_PRIVATE_KEY'),
+                        'subject' => config('webpush.vapid.subject', 'mailto:admin@example.com'),
+                        'publicKey' => config('webpush.vapid.public_key'),
+                        'privateKey' => config('webpush.vapid.private_key'),
                     ],
                 ];
                 $webPush = new \Minishlink\WebPush\WebPush($auth);
