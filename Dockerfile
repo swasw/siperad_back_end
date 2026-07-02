@@ -5,10 +5,14 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libgmp-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     zip \
     supervisor
 
-RUN docker-php-ext-install pdo pdo_mysql bcmath gmp
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql bcmath gmp gd zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
