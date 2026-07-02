@@ -71,10 +71,9 @@ class ImportController extends Controller
     public function importAngkatan(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt,xlsx,xls'
+            'file' => 'required'
         ], [
-            'file.required' => 'Silakan pilih file terlebih dahulu.',
-            'file.mimes' => 'File harus berformat csv, txt, xls, atau xlsx.'
+            'file.required' => 'Silakan pilih file terlebih dahulu.'
         ]);
 
         $file = $request->file('file');
@@ -91,10 +90,9 @@ class ImportController extends Controller
     public function importBarang(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt,xlsx,xls'
+            'file' => 'required'
         ], [
-            'file.required' => 'Silakan pilih file terlebih dahulu.',
-            'file.mimes' => 'File harus berformat csv, txt, xls, atau xlsx.'
+            'file.required' => 'Silakan pilih file terlebih dahulu.'
         ]);
 
         $file = $request->file('file');
